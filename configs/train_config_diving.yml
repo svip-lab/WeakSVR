@@ -1,0 +1,61 @@
+TRAIN:
+  USE_CUDA: True
+  MAX_EPOCH: 300
+  BATCH_SIZE: 4
+# ddp
+#  BATCH_SIZE: 4
+
+  LR: 0.0005
+  DROPOUT: 0.0
+  SEED: 1234
+  FREEZE_BACKBONE: True
+
+#  SAVE_PATH: 'csv_logs'
+#  SAVE_PATH: 'coin_logs'
+  SAVE_PATH: 'diving_logs'
+
+MODEL:
+  BACKBONE: 'resnet'
+
+#  PRETRAIN: '/public/home/dongsx/svip/pretrained_models/tsn_r50_256p_1x1x3_100e_kinetics400_rgb_20200725-22592236.pth'
+
+  PRETRAIN: '/public/home/dongsx/svip/pretrained_models/resnet50-kinetics400.pth'
+  DIM_EMBEDDING: 128
+  TRANSFORMER: True
+  ALIGNMENT: True
+  SEQ_LOSS_COEF: 0.0
+  INFO_LOSS_COEF: 1.0
+  GUMBEL_LOSS_COEF: 1.0
+  SAVE_EPOCHS: 100
+
+
+DATASET:
+  MODE: 'train'
+  RANDOM_SAMPLE: True
+
+#  CSV dataset
+#  NAME: 'CSV'
+#  TXT_PATH: '/storage/data/dongsx/dataset/CSV/splits/train_pairs.txt'
+#  NUM_CLASS: 45
+
+#  COIN dataset
+#  NAME: 'COIN-SV'
+#  TXT_PATH: '/storage/data/dongsx/dataset/COIN/splits/train_pairs.txt'
+#  NUM_CLASS: 37
+
+#  Diving dataset
+  NAME: 'DIVING48-SV'
+  TXT_PATH: '/storage/data/dongsx/dataset/Diving48/splits/train_pairs.txt'
+  NUM_CLASS: 20
+
+
+
+  NUM_SAMPLE: 5000
+  NUM_CLIP: 16
+  AUGMENT: True
+  SHUFFLE: True
+  NUM_WORKERS: 10
+
+
+
+
