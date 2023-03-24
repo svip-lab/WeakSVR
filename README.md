@@ -14,5 +14,15 @@ Sequential video understanding, as an emerging video understanding task, has dri
 Specifically, we use a transformer to aggregate frame-level features for video representation and use a pre-trained text encoder to encode the texts corresponding to each action and the whole video, respectively. To model the correspondence between text and video, we propose a multiple granularity loss, where the video-paragraph contrastive loss enforces matching between the whole video and the complete script, and a fine-grained frame-sentence contrastive loss enforces the matching between each action and its description. As the frame-sentence correspondence is not available, we propose to use the fact that video actions happen sequentially in the temporal domain to generate pseudo frame-sentence correspondence and supervise the network training with the pseudo labels. Extensive experiments on video sequence verification and texttovideo matching show that our method outperforms baselines by a large margin, which validates the effectiveness of our proposed approach.
 
 ## Usage  
-### Install 
 Preparing
+
+## Citation 
+If you find the project or our method is useful, please consider citing the paper.  
+```
+@article{dong2023weakly,
+  title={Weakly Supervised Video Representation Learning with Unaligned Text for Sequential Videos},
+  author={Dong, Sixun and Hu, Huazhang and Lian, Dongze and Luo, Weixin and Qian, Yicheng and Gao, Shenghua},
+  journal={arXiv preprint arXiv:2303.12370},
+  year={2023}
+}
+```
