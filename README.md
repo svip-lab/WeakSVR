@@ -13,6 +13,9 @@ Sequential video understanding, as an emerging video understanding task, has dri
 ## Usage  
 Preparing
 
+## Acknowledgement
+Codebase from [SVIP](https://github.com/svip-lab/SVIP-Sequence-VerIfication-for-Procedures-in-Videos)
+
 ## Citation 
 If you find the project or our method is useful, please consider citing the paper.  
 ```
