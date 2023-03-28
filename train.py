@@ -31,23 +31,17 @@ warnings.filterwarnings("ignore")
 
 # TORCH_DISTRIBUTED_DEBUG = 'Detail'
 
-
-
 # torch.autograd.set_detect_anomaly(True)
 def setup(local_rank):
     torch.cuda.set_device(local_rank)
     dist.init_process_group(backend='nccl')
 
 
-def check_args_cfg(args, cfg):
-    pass
-def update_yaml():
-    yamlpath = os.path.join('./train_yaml', 'test.yaml')
-
 def init_log(cfg=None, eval_cfg=None, args=None, local_rank=0,):
 
     cfg, eval_cfg = update_cfg_from_args(cfg, eval_cfg, args)
-    logger_path = os.path.join(cfg.TRAIN.SAVE_PATH, '/logs')
+
+    logger_path = os.path.join(cfg.TRAIN.SAVE_PATH, 'logs')
     logger = setup_logger('Sequence Verification', logger_path, args.log_name, args.local_rank)
     logger.info('----------------Running with args----------------\n{}\n'.format(vars(args)))
     if args.cfg_from_args:
@@ -57,15 +51,6 @@ def init_log(cfg=None, eval_cfg=None, args=None, local_rank=0,):
         logger.info('-------------Update eval cfg from train config-------------\n')
         logger.info('Running eval with config:\n{}\n'.format(eval_cfg))
 
-
-    # if cfg.MODEL.SAVE_MODEL_LOG and args.local_rank==0:
-    #     model = build_model(cfg=cfg, args=args, model_log=True).to(args.local_rank)
-    #     if args.backbone == 'resnet':
-    #         model_log = summary(model, (16, 3, 180, 320), depth=3)
-    #     else:
-    #         model_log = summary(model, (16, 3, 224, 224), depth=3)
-    #     logger.info('Running training with model:\n{}\n'.format(model_log))
-    #     del model
 
     return logger
 
@@ -85,7 +70,7 @@ def train(cfg, eval_cfg, args,):
     logger = init_log(cfg, eval_cfg, args, local_rank)
     if dist.get_rank() == 0:
         log_dir = args.tensorboard
-        writer = SummaryWriter(log_dir=os.path.join('log/', log_dir))
+        writer = SummaryWriter(log_dir=os.path.join('log', log_dir))
     else:
         writer = None
 
@@ -94,16 +79,9 @@ def train(cfg, eval_cfg, args,):
 
     model = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)
     model = DDP(model, device_ids=[local_rank], output_device=local_rank, find_unused_parameters=True)
-    # optimizer = torch.optim.AdamW(model.parameters(), lr=cfg.TRAIN.LR, weight_decay=0.01)
-
 
     backbone_params = list(map(id, model.module.backbone.parameters()))
     finetune_params = filter(lambda p: id(p) not in backbone_params, model.parameters())
-
-    # optimizer = torch.optim.AdamW([
-    #                 {'params': model.module.backbone.parameters(), 'lr': 1e-7},
-    #                 {'params': finetune_params},
-    #             ], lr=cfg.TRAIN.LR, weight_decay=0.01)
 
     if not args.pair:
         args.info_mask = False
@@ -130,8 +108,6 @@ def train(cfg, eval_cfg, args,):
         w_lr = 1
         optimizer1 = torch.optim.AdamW(model.module.backbone.parameters(), lr=cfg.TRAIN.LR * 1e-2, weight_decay=0.01)
 
-    # optimizer1 = torch.optim.AdamW(model.module.backbone.parameters(), lr=cfg.TRAIN.LR * 1e-2, weight_decay=0.01)
-    # optimizer1 = torch.optim.AdamW(model.module.backbone.parameters(), lr=1e-7, weight_decay=0.01)
     optimizer2 = torch.optim.AdamW(finetune_params, lr=cfg.TRAIN.LR, weight_decay=0.01)
     if args.warmup_step == 0:
 
@@ -174,33 +150,20 @@ def train(cfg, eval_cfg, args,):
         start_epoch = checkpoint['epoch']
         logger.info('-> Loaded checkpoint %s (epoch: %d)' % (args.load_path, start_epoch))
 
-    # Mulitple gpu
-    # if torch.cuda.device_count() > 1 and torch.cuda.is_available():
-    #     logger.info('Let us use %d GPUs' % torch.cuda.device_count())
-    #     model = torch.nn.DataParallel(model)
 
     # Create checkpoint dir
     if cfg.TRAIN.SAVE_PATH:
-        checkpoint_dir = os.path.join(cfg.TRAIN.SAVE_PATH, '/save_models')
+        checkpoint_dir = os.path.join(cfg.TRAIN.SAVE_PATH,'save_models')
         if not os.path.exists(checkpoint_dir) and dist.get_rank() == 0:
             os.makedirs(checkpoint_dir)
     else:
         checkpoint_dir = None
     # Start training
-    Best_AUC_VAL = 0
+
     Best_AUC = 0
     train_loader = load_dataset_ddp(cfg, args, drop_last=True)
     test_loader = load_dataset_ddp(eval_cfg, args, drop_last=False)
-    if cfg.DATASET.NAME =='COIN-SV' or cfg.DATASET.NAME =='DIVING48-SV':
-        eval_cfg2 = eval_cfg
-        eval_cfg2.DATASET.TXT_PATH = cfg.DATASET.TXT_PATH.replace('train_pairs.txt', 'val_pairs.txt')
-        eval_cfg2.DATASET.MODE = 'val'
-        val_loader = load_dataset_ddp(eval_cfg2, args, drop_last=False)
 
-    if args.retrival:
-        retrival_cfg = eval_cfg
-        retrival_cfg.DATASET.TXT_PATH = cfg.DATASET.TXT_PATH.replace('train_pairs.txt', 'text_retrieval.txt')
-        retrival_loader = load_dataset_retrival_ddp(retrival_cfg, args, drop_last=False)
     scaler = GradScaler()
 
     start_time = time.time()
@@ -217,10 +180,11 @@ def train(cfg, eval_cfg, args,):
             w_cls = 0
         train_loader.sampler.set_epoch(epoch)
         test_loader.sampler.set_epoch(epoch)
-        loss_per_epoch, loss_per_epoch_cls, loss_per_epoch_seq, loss_per_epoch_info,loss_per_epoch_gumbel = 0, 0, 0, 0,0
+        loss_per_epoch, loss_per_epoch_cls, loss_per_epoch_seq, loss_per_epoch_info, loss_per_epoch_gumbel = 0, 0, 0, 0, 0
         num_true_pred = 0
         logit_scale1 = 0
         logit_scale2 = 0
+
         # train one epoch
         model.train()
         if dist.get_rank() == 0 and False:
@@ -228,9 +192,6 @@ def train(cfg, eval_cfg, args,):
         else:
             iter_train = train_loader
         for iter, sample in enumerate(iter_train):
-            # break
-            # if iter == 2 and args.debug:
-            #     break
             if args.pair:
                 frames1 = frames_preprocess(sample['clips1'][0], flipped=False).to(local_rank, non_blocking=True)
                 frames2 = frames_preprocess(sample['clips2'][0], flipped=False).to(local_rank, non_blocking=True)
@@ -251,54 +212,51 @@ def train(cfg, eval_cfg, args,):
                     optimizer1.zero_grad()
                 optimizer2.zero_grad()
 
-                if args.use_amp:
-                    with autocast():
+                with autocast():
 
-                        pred1, text_feature1, seq_features1, embed1, logit_scale1_1, all_text_feature1, text_feature_phrase1, logit_scale1_2 = model(frames1,
-                                                                                                             label_token1,
-                                                                                                             label_token_phrase1,
-                                                                                                             label_neg_token1)
-                        pred2, text_feature2, seq_features2, embed2, logit_scale2_1, all_text_feature2, text_feature_phrase2, logit_scale2_2 = model(frames2,
-                                                                                                             label_token2,
-                                                                                                             label_token_phrase2,
-                                                                                                             label_neg_token2)
+                    pred1, text_feature1, seq_features1, embed1, logit_scale1_1, all_text_feature1, text_feature_phrase1, logit_scale1_2 = model(frames1,
+                                                                                                         label_token1,
+                                                                                                         label_token_phrase1,
+                                                                                                         label_neg_token1)
+                    pred2, text_feature2, seq_features2, embed2, logit_scale2_1, all_text_feature2, text_feature_phrase2, logit_scale2_2 = model(frames2,
+                                                                                                         label_token2,
+                                                                                                         label_token_phrase2,
+                                                                                                         label_neg_token2)
 
-                        loss_cls = compute_cls_loss(pred1, labels1) + compute_cls_loss(pred2, labels2)
-                        if cfg.MODEL.SEQ_LOSS_COEF != 0:
-                            loss_seq = compute_seq_loss(seq_features1, seq_features2)
+                    loss_cls = compute_cls_loss(pred1, labels1) + compute_cls_loss(pred2, labels2)
+                    if cfg.MODEL.SEQ_LOSS_COEF != 0:
+                        loss_seq = compute_seq_loss(seq_features1, seq_features2)
+                    else:
+                        loss_seq = torch.zeros([1]).to(local_rank)
+                    if args.use_text:
+                        if args.use_neg_text:
+                            loss_info1 = compute_info_loss_neg(embed1, text_feature1, all_text_feature1, logit_scale1_1,)
+                            loss_info2 = compute_info_loss_neg(embed2, text_feature2, all_text_feature2, logit_scale2_1,)
                         else:
-                            loss_seq = torch.zeros([1]).to(local_rank)
-                        if args.use_text:
-                            if args.use_neg_text:
-                                loss_info1 = compute_info_loss_neg(embed1, text_feature1, all_text_feature1, logit_scale1_1,)
-                                loss_info2 = compute_info_loss_neg(embed2, text_feature2, all_text_feature2, logit_scale2_1,)
-                            else:
-                                loss_info1 = compute_info_loss(embed1, text_feature1, labels1, logit_scale1_1)
-                                loss_info2 = compute_info_loss(embed2, text_feature2, labels2, logit_scale2_1)
-                            loss_info = loss_info1 + loss_info2
-                        else:
-                            loss_info = torch.zeros([1]).to(local_rank)
+                            loss_info1 = compute_info_loss(embed1, text_feature1, labels1, logit_scale1_1)
+                            loss_info2 = compute_info_loss(embed2, text_feature2, labels2, logit_scale2_1)
+                        loss_info = loss_info1 + loss_info2
+                    else:
+                        loss_info = torch.zeros([1]).to(local_rank)
 
-                        if args.use_gumbel:
-                            loss_gumbel1 = compute_gumbel_loss(seq_features1, text_feature_phrase1, label_phrase_num1, logit_scale1_2,max_seq_length=MAX_SEQ_LENGTH, gt_type=args.gt_type,labels1=sample['labels1_raw'])
-                            loss_gumbel2 = compute_gumbel_loss(seq_features2, text_feature_phrase2, label_phrase_num2, logit_scale1_2,max_seq_length=MAX_SEQ_LENGTH, gt_type=args.gt_type,labels1=sample['labels2_raw'])
-                            loss_gumbel = loss_gumbel1 + loss_gumbel2
-                        else:
-                            loss_gumbel = torch.zeros([1]).to(local_rank)
-                        loss = w_cls * loss_cls + cfg.MODEL.SEQ_LOSS_COEF * loss_seq + cfg.MODEL.INFO_LOSS_COEF * loss_info \
-                               + cfg.MODEL.GUMBEL_LOSS_COEF * loss_gumbel
+                    if args.use_gumbel:
+                        loss_gumbel1 = compute_gumbel_loss(seq_features1, text_feature_phrase1, label_phrase_num1, logit_scale1_2,max_seq_length=MAX_SEQ_LENGTH, gt_type=args.gt_type,labels1=sample['labels1_raw'])
+                        loss_gumbel2 = compute_gumbel_loss(seq_features2, text_feature_phrase2, label_phrase_num2, logit_scale1_2,max_seq_length=MAX_SEQ_LENGTH, gt_type=args.gt_type,labels1=sample['labels2_raw'])
+                        loss_gumbel = loss_gumbel1 + loss_gumbel2
+                    else:
+                        loss_gumbel = torch.zeros([1]).to(local_rank)
+                    loss = w_cls * loss_cls + cfg.MODEL.SEQ_LOSS_COEF * loss_seq + cfg.MODEL.INFO_LOSS_COEF * loss_info \
+                           + cfg.MODEL.GUMBEL_LOSS_COEF * loss_gumbel
+
 
                 # Update weights
-                if args.use_amp:
-                    scaler.scale(loss).backward()
-                    if not args.freeze_backbone:
-                        scaler.step(optimizer1)
-                    scaler.step(optimizer2)
-                    scaler.update()
 
-                # else:
-                #     loss.backward()
-                #     optimizer.step()
+                scaler.scale(loss).backward()
+                if not args.freeze_backbone:
+                    scaler.step(optimizer1)
+                scaler.step(optimizer2)
+                scaler.update()
+
 
                 num_true_pred_per = (torch.argmax(pred1, dim=-1) == labels1).sum() + \
                                     (torch.argmax(pred2, dim=-1) == labels2).sum()
@@ -335,7 +293,7 @@ def train(cfg, eval_cfg, args,):
                             label_token_phrase1,
                             label_neg_token1)
                         if not args.pair:
-                            loss_cls = compute_cls_loss(pred1, labels1)
+                            loss_cls = compute_cls_loss(pred1*0, labels1)
                         else:
                             loss_cls = compute_cls_loss(pred1, labels1)
                         # loss_cls = torch.zeros([1]).to(local_rank)
@@ -352,13 +310,7 @@ def train(cfg, eval_cfg, args,):
                         else:
                             loss_gumbel = torch.zeros([1]).to(local_rank)
                         loss = w_cls * loss_cls + cfg.MODEL.INFO_LOSS_COEF * loss_info + cfg.MODEL.GUMBEL_LOSS_COEF * loss_gumbel
-                        # print(loss)
-                        # if torch.isnan(loss):
-                        #     ipdb.set_trace()
-                # else:
-                #     pred1, seq_features1, embed1, logit_scale1 = model(frames1)
-                #     loss_cls = compute_cls_loss(pred1, labels1)
-                #     loss = 1 * loss_cls
+
 
                 model = update_logit_scale(model)
                 # AUC and WDR
@@ -411,59 +363,6 @@ def train(cfg, eval_cfg, args,):
         # -------------------------------------------
         # test on test set
         auc_value, wdr_value = eval_per_epoch(model, test_loader, local_rank, eval_cfg, args)
-        # with torch.no_grad():
-        #     labels, preds, labels1_all, labels2_all = None, None, None, None
-        #     for iter, sample in enumerate(test_loader):
-        #         if iter == 3 and args.debug:
-        #             break
-        #         frames1_list = sample['clips1']
-        #         frames2_list = sample['clips2']
-        #         assert len(frames1_list) == len(frames2_list), 'frames1_list:{},frames2_list{}'.format(
-        #             len(frames1_list), len(frames2_list))
-        #
-        #         labels1 = sample['labels1']
-        #         labels2 = sample['labels2']
-        #         label = torch.tensor(np.array(labels1) == np.array(labels2)).to(local_rank)
-        #
-        #         embeds1_list = []
-        #         embeds2_list = []
-        #
-        #         for i in range(len(frames1_list)):
-        #             frames1 = frames_preprocess(frames1_list[i]).to(local_rank, non_blocking=True)
-        #             frames2 = frames_preprocess(frames2_list[i]).to(local_rank, non_blocking=True)
-        #             embeds1 = model(frames1, embed=True)
-        #             embeds2 = model(frames2, embed=True)
-        #
-        #             embeds1_list.append(embeds1.unsqueeze(dim=0))
-        #             embeds2_list.append(embeds2.unsqueeze(dim=0))
-        #
-        #         embeds1_avg = (torch.cat(embeds1_list, dim=0)).mean(dim=0)
-        #         embeds2_avg = (torch.cat(embeds2_list, dim=0)).mean(dim=0)
-        #         pred = pred_dist(args.dist, embeds1_avg, embeds2_avg)
-        #
-        #         torch.cuda.synchronize()
-        #
-        #         # gather from other gpu
-        #         pred = all_gather_concat(pred)
-        #         label = all_gather_concat(label)
-        #         labels1 = all_gather_object(labels1)
-        #         labels2 = all_gather_object(labels2)
-        #
-        #         # add all data to list
-        #         if iter == 0:
-        #             preds = pred
-        #             labels = label
-        #             labels1_all = labels1
-        #             labels2_all = labels2
-        #         else:
-        #             preds = torch.cat([preds, pred])
-        #             labels = torch.cat([labels, label])
-        #             labels1_all += labels1
-        #             labels2_all += labels2
-        #
-        # fpr, tpr, thresholds = roc_curve(labels.cpu().detach().numpy(), preds.cpu().detach().numpy(), pos_label=0)
-        # auc_value = auc(fpr, tpr)
-        # wdr_value = compute_WDR(preds, labels1_all, labels2_all, eval_cfg.DATASET.NAME)
         logger.info('Epoch [{}/{}], AUC: {:.6f}, WDR: {:.4f}.'
                     .format(epoch, cfg.TRAIN.MAX_EPOCH, auc_value, wdr_value))
 
@@ -472,34 +371,11 @@ def train(cfg, eval_cfg, args,):
             save_new_best_ckpt = True
         else:
             save_new_best_ckpt = False
-        # -------------------------------------------
-        # -------------------------------------------
-        # test on valid set
-        if (cfg.DATASET.NAME =='COIN-SV' or cfg.DATASET.NAME =='DIVING48-SV') and False:
-            val_loader.sampler.set_epoch(epoch)
-            auc_value_val, wdr_value_val = eval_per_epoch(model, val_loader, local_rank, eval_cfg2, args)
-            logger.info('Epoch [{}/{}], VAL: AUC: {:.6f}, WDR: {:.4f}.'
-                        .format(epoch, cfg.TRAIN.MAX_EPOCH, auc_value_val, wdr_value_val))
-            if auc_value_val > Best_AUC_VAL:
-                Best_AUC_VAL = auc_value_val
-                save_new_val_best_ckpt = True
-            else:
-                save_new_val_best_ckpt = False
-        else:
-            auc_value_val = 0
-            wdr_value_val = 0
-            save_new_val_best_ckpt = False
-        # -------------------------------------------
 
-        if args.retrival:
-            retrieval_auc = retrieval(model, retrival_loader, args, logger, epoch)
-            if dist.get_rank() == 0:
-                writer.add_scalar('AUC/retrieval', retrieval_auc, epoch)
         # -------------------------------------------
         # write tensorboard
         if dist.get_rank() == 0:
-            writer.add_scalar('AUC/val', auc_value_val, epoch)
-            writer.add_scalar('WDR/val', wdr_value_val, epoch)
+
             writer.add_scalar('AUC/test', auc_value, epoch)
             writer.add_scalar('WDR/test', wdr_value, epoch)
             writer.add_scalar('learning_rate/backbone', optimizer1.param_groups[0]['lr'], epoch)
@@ -514,12 +390,10 @@ def train(cfg, eval_cfg, args,):
             writer.close()
 
         # Save model every X epochs
-        if dist.get_rank() == 0 and (save_new_best_ckpt or save_new_val_best_ckpt) and args.save_model:
+        if dist.get_rank() == 0 and save_new_best_ckpt and args.save_model:
             save_dict = {'epoch': epoch,  # after training one epoch, the start_epoch should be epoch+1
                          'optimizer_state_dict1': optimizer1.state_dict(),
                          'optimizer_state_dict2': optimizer2.state_dict(),
-                         'auc_value_val': auc_value_val,
-                         'wdr_value_val': wdr_value_val,
                          'auc_value': auc_value,
                          'wdr_value': wdr_value,
                          'loss': loss.item(),
@@ -528,31 +402,12 @@ def train(cfg, eval_cfg, args,):
                 save_dict['model_state_dict'] = model.module.state_dict()
             except:
                 save_dict['model_state_dict'] = model.state_dict()
-            if save_new_val_best_ckpt:
-                save_name = 'best_val_model' + '.tar'
-                torch.save(save_dict, os.path.join(checkpoint_dir, save_name))
-                logger.info('Save ' + os.path.join(checkpoint_dir, save_name) + ' done!')
+
             if save_new_best_ckpt:
                 save_name = 'best_model' + '.tar'
                 torch.save(save_dict, os.path.join(checkpoint_dir, save_name))
                 logger.info('Save ' + os.path.join(checkpoint_dir, save_name) + ' done!')
-        # if dist.get_rank() == 0:
-        #     save_dict = {'epoch': epoch,  # after training one epoch, the start_epoch should be epoch+1
-        #                  'optimizer_state_dict1': optimizer1.state_dict(),
-        #                  'optimizer_state_dict2': optimizer2.state_dict(),
-        #                  'auc_value_val': auc_value_val,
-        #                  'wdr_value_val': wdr_value_val,
-        #                  'auc_value': auc_value,
-        #                  'wdr_value': wdr_value,
-        #                  'loss': loss.item(),
-        #                  }
-        #     try:  # with nn.DataParallel() the net is added as a submodule of DataParallel
-        #         save_dict['model_state_dict'] = model.module.state_dict()
-        #     except:
-        #         save_dict['model_state_dict'] = model.state_dict()
-        #     save_name = str(epoch) + '.tar'
-        #     torch.save(save_dict, os.path.join(checkpoint_dir, save_name))
-        #     logger.info('Save ' + os.path.join(checkpoint_dir, save_name) + ' done!')
+
         dist.barrier()
         # Learning rate decay
         scheduler1.step()
