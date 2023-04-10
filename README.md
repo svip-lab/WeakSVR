@@ -3,6 +3,7 @@
 Here is the official implementation for CVPR 2023 paper "Weakly Supervised Video Representation Learning with Unaligned Text for Sequential Videos".
 
 ## 🌱News
+- 2023-03-29: We have updated the Chinese introduction of the paper. [[Zhihu](https://zhuanlan.zhihu.com/p/617926257)]
 - 2023-03-24: The code has been released (need revisions).
 - 2023-03-22: The preprint of the paper is available. [[Paper](https://arxiv.org/abs/2303.12370)]
 - 2023-02-28: This paper has been accepted by **`CVPR 2023`**.
