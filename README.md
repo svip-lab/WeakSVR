@@ -27,3 +27,12 @@ If you find the project or our method is useful, please consider citing the pape
   year={2023}
 }
 ```
+```
+@inproceedings{dong2023weakly,
+  title={Weakly Supervised Video Representation Learning with Unaligned Text for Sequential Videos},
+  author={Dong, Sixun and Hu, Huazhang and Lian, Dongze and Luo, Weixin and Qian, Yicheng and Gao, Shenghua},
+  booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition},
+  pages={2437--2447},
+  year={2023}
+}
+```
