@@ -41,7 +41,7 @@ def compute_WDR(preds, labels1, labels2, DATASET):
     # label_bank = read_json('Datasets/Diving48-SV/label_bank.json')
     # label_bank = read_json('Datasets/CSV/label_bank.json')
 
-    # Calcualte wdr
+    # Calculate wdr
     import ipdb
     # ipdb.set_trace()
     labels = torch.tensor(np.array(labels1) == np.array(labels2))

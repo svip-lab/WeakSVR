@@ -69,11 +69,11 @@ def viterbi(y, A, B, Pi=None):
     T1 = np.empty((K, T), 'd')
     T2 = np.empty((K, T), 'B')
 
-    # Initilaize the tracking tables from first observation
+    # Initialize the tracking tables from first observation
     T1[:, 0] = Pi * B[:, y[0]]
     T2[:, 0] = 0
 
-    # Iterate throught the observations updating the tracking tables
+    # Iterate through the observations updating the tracking tables
     for i in range(1, T):
         T1[:, i] = np.max(T1[:, i - 1] * A.T * B[np.newaxis, :, y[i]].T, 1)
         T2[:, i] = np.argmax(T1[:, i - 1] * A.T, 1)
@@ -523,7 +523,7 @@ def stamp2label(matrices, time_stamps):
 
 
 def get_pos_samples(matrix_row, stamp):
-    # caculate each row
+    # calculate each row
     # matrix tensor[1 ,T] stamp [1,2]
     start = int(stamp[0])
     end = int(stamp[1])
