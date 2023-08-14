@@ -18,8 +18,13 @@ Sequential video understanding, as an emerging video understanding task, has dri
 
 ## Usage  
 Preparing
-## Checkpoint
-weakly,CSV and Diving-SV, [BaiduDisk(code:cvpr)](https://pan.baidu.com/s/1mYRy27c-_1Wj238gNr2IOw?pwd=cvpr)
+
+### Model Zoo
+##### Weakly Supervised (w/o CLS)
+|  Method   | CSV | Diving-SV | COIN-SV |
+|  :---: | :-----: | :----:  | :----: | 
+| Ours  | 80.81 [BaiduDisk(code:cvpr)](  https://pan.baidu.com/s/1x660E9b3_BvHidEG6wAbLQ?pwd=cvpr) | [BaiduDisk(code:cvpr)](https://pan.baidu.com/s/1zGixeyLq8HNaNCQptpwz3g?pwd=cvpr)  |  -  |
+
 ## Acknowledgement
 Codebase from [SVIP](https://github.com/svip-lab/SVIP-Sequence-VerIfication-for-Procedures-in-Videos)
 
