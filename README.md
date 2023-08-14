@@ -18,7 +18,8 @@ Sequential video understanding, as an emerging video understanding task, has dri
 
 ## Usage  
 Preparing
-
+## Checkpoint
+weakly,CSV and Diving-SV, [BaiduDisk(code:cvpr)](https://pan.baidu.com/s/1mYRy27c-_1Wj238gNr2IOw?pwd=cvpr)
 ## Acknowledgement
 Codebase from [SVIP](https://github.com/svip-lab/SVIP-Sequence-VerIfication-for-Procedures-in-Videos)
 
