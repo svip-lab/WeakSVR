@@ -3,6 +3,7 @@
 Here is the official implementation for CVPR 2023 paper "Weakly Supervised Video Representation Learning with Unaligned Text for Sequential Videos".
 
 ## 🌱News
+- 2023-08-14: The model ckpt has been available.
 - 2023-06-01: The oral presentation of our work is available. [[Youtube](https://www.youtube.com/watch?v=AqozSRYP7Pc)] [[Bilibili](https://www.bilibili.com/video/BV1AW4y1R7um/)]
 - 2023-03-29: We have updated the Chinese introduction of the paper. [[Zhihu](https://zhuanlan.zhihu.com/p/617926257)]
 - 2023-03-24: The code has been released (need revisions).
@@ -24,7 +25,7 @@ Preparing
 |  Method   | CSV | Diving-SV | COIN-SV |
 |  :---: | :-----: | :----:  | :----: | 
 | Ours  | 80.81 ([BaiduDisk(code:cvpr)](  https://pan.baidu.com/s/1x660E9b3_BvHidEG6wAbLQ?pwd=cvpr)) | 85.46 ([BaiduDisk(code:cvpr)](https://pan.baidu.com/s/1zGixeyLq8HNaNCQptpwz3g?pwd=cvpr))  |  -  |
-
+We will upload more trained model soon which may help you.
 ## Acknowledgement
 Codebase from [SVIP](https://github.com/svip-lab/SVIP-Sequence-VerIfication-for-Procedures-in-Videos)
 
