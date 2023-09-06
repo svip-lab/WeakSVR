@@ -31,14 +31,7 @@ Codebase from [SVIP](https://github.com/svip-lab/SVIP-Sequence-VerIfication-for-
 
 ## Citation 
 If you find the project or our method is useful, please consider citing the paper.  
-```
-@article{dong2023weakly,
-  title={Weakly Supervised Video Representation Learning with Unaligned Text for Sequential Videos},
-  author={Dong, Sixun and Hu, Huazhang and Lian, Dongze and Luo, Weixin and Qian, Yicheng and Gao, Shenghua},
-  journal={arXiv preprint arXiv:2303.12370},
-  year={2023}
-}
-```
+
 ```
 @inproceedings{dong2023weakly,
   title={Weakly Supervised Video Representation Learning with Unaligned Text for Sequential Videos},
