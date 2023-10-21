@@ -20,12 +20,14 @@ Sequential video understanding, as an emerging video understanding task, has dri
 ## Usage  
 Preparing
 
+- Sorry for so long wait, we are busy doing new work and you could refer to [SVIP](https://github.com/svip-lab/SVIP-Sequence-VerIfication-for-Procedures-in-Videos)  to prepare the environment and dataset. Please try this repo first, and if you have any trouble with installation, feel free to contact us.
+
 ### Model Zoo
 ##### Weakly Supervised (w/o CLS)
 |  Method   | CSV | Diving-SV | COIN-SV |
 |  :---: | :-----: | :----:  | :----: | 
 | Ours  | 80.81 ([BaiduDisk(code:cvpr)](  https://pan.baidu.com/s/1x660E9b3_BvHidEG6wAbLQ?pwd=cvpr)) | 85.46 ([BaiduDisk(code:cvpr)](https://pan.baidu.com/s/1zGixeyLq8HNaNCQptpwz3g?pwd=cvpr))  |  -  |
-We will upload more trained model soon which may help you.
+We will upload more trained models soon which may help you.
 ## Acknowledgement
 Codebase from [SVIP](https://github.com/svip-lab/SVIP-Sequence-VerIfication-for-Procedures-in-Videos)
 
