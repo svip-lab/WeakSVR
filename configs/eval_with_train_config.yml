@@ -1,0 +1,41 @@
+TRAIN:
+  BATCH_SIZE: 8
+  DROPOUT: 0.0
+
+
+MODEL:
+  DIM_EMBEDDING: 128
+  TRANSFORMER: True
+  ALIGNMENT: True
+
+
+DATASET:
+  MODE: 'test'
+
+
+##  CSV dataset
+#  NAME: 'CSV'
+#  TXT_PATH: '/storage/data/dongsx/dataset/CSV/splits/test_pairs.txt'
+#  NUM_CLASS: 45
+
+#  COIN dataset
+#  NAME: 'COIN-SV'
+#  TXT_PATH: './Datasets/COIN-SV/val_pairs.txt'
+#  TXT_PATH: '/storage/data/dongsx/dataset/COIN/splits/val_pairs.txt'
+#  TXT_PATH: '/storage/data/dongsx/dataset/COIN/splits/test_pairs.txt'
+#  TXT_PATH: './Datasets/COIN-SV/test_pairs.txt'
+#  NUM_CLASS: 37
+
+#  Diving48 dataset;
+#  NAME: 'DIVING48-SV'
+#  TXT_PATH: '/Datasets/DIVING48-SV/val_pairs.txt'
+#  TXT_PATH: '/Datasets/DIVING48-SV/test_pairs.txt'
+#  NUM_CLASS: 20
+
+
+  NUM_CLIP: 16
+  AUGMENT: False
+  SHUFFLE: False
+  NUM_WORKERS: 10
+
+
