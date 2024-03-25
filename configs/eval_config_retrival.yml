@@ -1,0 +1,34 @@
+TRAIN:
+
+  MAX_EPOCH: 300
+  BATCH_SIZE: 4
+
+  LR: 0.0005
+  DROPOUT: 0.0
+  SEED: 1234
+  FREEZE_BACKBONE: True
+
+  SAVE_PATH: 'retrival_logs'
+
+MODEL:
+
+  PRETRAIN: '/public/home/dongsx/svip/pretrained_models/resnet50-kinetics400.pth'
+
+
+DATASET:
+  MODE: 'test'
+
+#  CSV dataset
+  NAME: 'CSV'
+  TXT_PATH: '/storage/data/dongsx/dataset/CSV/splits/text_retrieval.txt'
+  NUM_CLASS: 45
+
+
+  NUM_CLIP: 16
+  AUGMENT: False
+  SHUFFLE: False
+  NUM_WORKERS: 10
+
+
+
+
