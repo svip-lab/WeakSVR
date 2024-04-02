@@ -29,7 +29,7 @@ Preparing
 |  :---: | :-----: | :----:  | :----: | 
 | Ours  | 80.81 ([BaiduDisk(code:cvpr)](  https://pan.baidu.com/s/1x660E9b3_BvHidEG6wAbLQ?pwd=cvpr)) | 85.46 ([BaiduDisk(code:cvpr)](https://pan.baidu.com/s/1zGixeyLq8HNaNCQptpwz3g?pwd=cvpr))  |  -  |
 We will upload more trained models soon which may help you.
-## Acknowledgement
+## Acknowledgment
 Codebase from [SVIP](https://github.com/svip-lab/SVIP-Sequence-VerIfication-for-Procedures-in-Videos)
 
 ## Citation 
